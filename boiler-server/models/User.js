@@ -54,25 +54,27 @@ userSchema.pre('save', function(next) {
 })
 
 userSchema.methods.comparePassword = function(plainPassword, cb) {
+	var user = this
 	// plainPassword: 프론트 입력값
-	bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
+	bcrypt.compare(plainPassword, user.password, function(err, isMatch) {
 		if(err) return cb(err)
 		cb(null, isMatch)
 	})
 }
 
 userSchema.methods.generateToken = function(cb) {
+	var user = this
 	// jsonwebtoken 이용해 토큰생성
-	const token = jwt.sign(this._id.toHexString(), 'secretToken')
-	this.token = token
-	this.save(function(err, user) {
+	const token = jwt.sign(user._id.toHexString(), 'secretToken')
+	user.token = token
+	user.save(function(err, user) {
 		if(err) return cb(err)
 		cb(null, user)
 	})
 }
 
 userSchema.statics.findByToken = function(token, cb) {
-	let user = this
+	var user = this
 	jwt.verify(token, 'secretToken', function(err, decode) {
 		// 유저 아이디를 이용해 유저를 찾는다.
 		// 클라이언트에서 갖고온 token과 DB에 보관된 토큰 일치 확인
